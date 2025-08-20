@@ -148,7 +148,7 @@ def alterar_status(id: str):
             status_code=400
         )
 
-    cards_cobranca = bitrix.deal_list({"CATEGORY_ID": "14", "=UF_CRM_1732556583": id_externo}, [])
+    cards_cobranca = bitrix.deal_list({"CATEGORY_ID": "14", "=UF_CRM_1732556583": id_externo}, ["UF_CRM_1755287872064"])
     
     if not cards_cobranca:
         return JSONResponse(
@@ -192,6 +192,11 @@ def alterar_status(id: str):
                 "message": "Status alterado para 'BAIXADO'.",
             }, status_code=200)
     
+    return JSONResponse({
+        "status": "sucess",
+        "message": "Pedido processado, mas nenhuma mudança necessária foi encontrada.",
+    }, status_code=200)
+
     # status: Negativado - 250;  Baixado - 252; Solicitado - 258
 
 @app.post('/retirar-negativacao')
@@ -214,12 +219,22 @@ def retirar_negativacao(id: str):
     status_negativacao = card.get('UF_CRM_1755287872064')
 
     if status_negativacao == '250' or status_negativacao == '258':
-        cards_negativados = bitrix.deal_list({"CATEGORY_ID": "16", "=UF_CRM_1732556583": id_externo}, [])
+        cards_negativados = bitrix.deal_list(
+            {"CATEGORY_ID": "16", "=UF_CRM_1732556583": id_externo,
+                "STAGE_ID": ['C16:NEW', 'C16:PREPARATION', 'C16:FINAL_INVOICE', 'C16:LOSE']}, 
+            ["STAGE_ID", "UF_CRM_1745350930427", "UF_CRM_1755280142"]
+        )
 
         titulos_pagos = [
             card.get(campo) for campo in CAMPOS_VENCIDOS_RJ + CAMPOS_VENCIDOS_PROTON 
             if card.get(campo)
         ]
+
+        if not cards_negativados:
+            return JSONResponse({
+                "status": "sucess",
+                "message": "Nenhum título foi encontrado no funil 16. Pedido processado com sucesso.",
+            }, status_code=200)
 
         for card_negativado in cards_negativados:
             id_negativado = card_negativado.get('ID')
