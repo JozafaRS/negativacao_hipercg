@@ -164,7 +164,7 @@ def alterar_status(id: str):
     id_correspondente = correspondente.get('ID')
 
     if estagio == 'C16:NEW' or estagio == 'C16:FINAL_INVOICE': # a negativar / iniciar segunda negativação
-        if not status_negativacao_correspondente:
+        if not status_negativacao_correspondente or status_negativacao_correspondente == '252':
             bitrix.deal_update(id_correspondente, {"UF_CRM_1755287872064": "258"})
             return JSONResponse({
                 "status": "sucess",
