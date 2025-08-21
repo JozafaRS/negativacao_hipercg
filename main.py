@@ -26,6 +26,7 @@ class Titulo:
         componentes = texto.split("-")
 
         self.texto = texto
+        self.idUnico = f'{componentes[0].strip()}-{componentes[1].strip()}'
         self.idTitulo = componentes[0].strip()
         self.parcela = componentes[1].strip()
         self.emissao = componentes[2].strip()
@@ -42,14 +43,14 @@ def listar_titulos(dicionario: dict) -> dict:
 
             if valor:
                 titulo = Titulo(valor, 'rj')
-                titulos[titulo.idTitulo] = titulo
+                titulos[titulo.idUnico] = titulo
 
         for campo in CAMPOS_VENCIDOS_PROTON:
             valor = dicionario[campo]
 
             if valor:
                 titulo = Titulo(valor, 'proton')
-                titulos[titulo.idTitulo] = titulo
+                titulos[titulo.idUnico] = titulo
     
         return titulos
 
